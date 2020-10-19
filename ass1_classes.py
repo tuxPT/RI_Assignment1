@@ -1,4 +1,6 @@
 import csv
+import re
+
 
 ### Class used to read and store document data such as title and abstract
 ### Files with no title or abstract are ignored
@@ -21,24 +23,38 @@ class CorpusReader():
                 ### Update file index
                 index_file +=1
 
-        print(self.memory_files)
+        #print(self.memory_files)
 
    
     
 ### Class used to create tokens
-### Only deletes non alpha numeric characters, transforms all text to lower case and split
+### Deletes non alpha numeric characters, ignores tokens with less than 3 chars, transforms all text to lower case and split
 class SimpleToken():
-    def __init__(self, document_data):
-        self._text = document_data
-        self._not_alphaNum = ['\'', ',', '.', '*', '+', '=', '@', ':', ';', '"', '?', '!', '/', '\\', '|', '#', '-', '<', '>', '$', '%', '(',')', '[',']','{','}']
-        ### Delete all non alpha numeric characters
-        for char in self._not_alphaNum:
-            self._text = self._text.replace(char, "")
+    def __init__(self):
+        self.tokens = []
         
 
+    def add_data(self, document_data, id_file):
+        ### Replace all non alpha numeric characters by spaces
+        self._text = re.sub( '[^a-zA-Z0-9]+', ' ', document_data)
+         
         ### Convert all text to lower case and split
-        self.tokens = self._text.lower().split()
+        self._initial_tokens = self._text.lower().split()
+        for elem in self._initial_tokens:
+            if len(elem) > 3:
+                self.tokens.append((elem, id_file))
+    
+    
+    ###Sort tokens by alphabetical order
+    def sort_tokens(self):
+        self.tokens = sorted(self.tokens, key= lambda x : x[0])
 
+
+class ImprovedTokenizer(SimpleToken):
+    def __init__(self):
+        super()
+        self._stop_words_file = open('snowball_stopwords_EN.txt')
+        self._stop_words = self._stop_words_file.read().split()
 
 
 ### Class that given a token and a file id stores that info in a dictionary
@@ -49,7 +65,8 @@ class Indexer():
     def add_token(self, token, id_file):
 
         ### If token already in dictionary of inverted indexes and the file id not in the file list of the token
-        if token in self.dict_inverted_index.keys()and id_file not in self.dict_inverted_index[token][1]:
+        if token in self.dict_inverted_index.keys():
+            if id_file not in self.dict_inverted_index[token][1]:
                 self.dict_inverted_index[token][1].append(id_file)
                 self.dict_inverted_index[token][0] += 1
 
