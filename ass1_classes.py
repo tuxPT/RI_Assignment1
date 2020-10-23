@@ -9,20 +9,21 @@ from collections import defaultdict
 ### {id_file0 : "title and abstract", id_file1 : "title and abstract", id_file2 : "title and abstract"}
 class CorpusReader():
     def __init__(self, filename):
-        self.memory_files = {}
         ### Open csv file
         with open(filename, "r", newline='') as csvfile:
             data_reader = csv.reader(csvfile, delimiter=',')
             ### Pass the header line
             next(data_reader)
-            index_file=0
-            for line in data_reader:
+            self.memory_files = { i : line[2] + " " + line[7] for i, line in enumerate(data_reader) if line[2]  != '' and line[7] != ''}
+            #self.memory_files={}
+            #index_file=0
+            #for line in data_reader:
                 ### Store only the documents with title and abstract
-                if line[2]  != '' and line[7] != '':
-                    self.memory_files[index_file] = line[2] + " " +  line[7]
+            #    if line[2]  != '' and line[7] != '':
+            #        self.memory_files[index_file] = line[2] + " " +  line[7]
 
                 ### Update file index
-                index_file +=1
+            #    index_file +=1    
 
         #print(self.memory_files)
 
@@ -50,13 +51,23 @@ class SimpleToken:
         self.tokens = sorted(self.tokens, key= lambda x : x[0])
 
 
-class ImprovedTokenizer(SimpleToken):
+class ImprovedTokenizer():
     def __init__(self):
-        super()
         self.stem = Stemmer.Stemmer('english')
         self._stop_words_file = open('snowball_stopwords_EN.txt')
         self._stop_words = self._stop_words_file.read().split()
-
+    
+    def process(self,document_data):
+        ### Replace all non alpha numeric characters by spaces
+        _text = re.sub( '[^a-zA-Z0-9]+', ' ', document_data)
+        ##Filter tokens with stop words
+        token_init = [ tk for tk in _text.lower().split() if tk not in self._stop_words]
+        
+        ##Use stemm processing
+        final_token = self.stem.stemWords(token_init)
+        ### Convert all text to lower case and split
+        #return frozenset({token for token in _text.lower().split() if len(token)>3})
+    
 
 ### Class that given a token and a file id stores that info in a dictionary
 class Indexer:
