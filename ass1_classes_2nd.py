@@ -33,62 +33,46 @@ class CorpusReader():
 ### Deletes non alpha numeric characters, ignores tokens with less than 3 chars, transforms all text to lower case and split
 class SimpleToken:
 
-    def process(document_data):
+    def process(document_data, id_file):
         ### Replace all non alpha numeric characters by spaces
         _text = re.sub( '[^a-zA-Z0-9]+', ' ', document_data)
 
         ### Convert all text to lower case and split
-        return {token for token in _text.lower().split() if len(token)>3}
-        #print(_test)
-        #self.tokens = self._text.lower().split()
-        # for elem in self._initial_tokens:
-        #     if len(elem) > 3:
-        #         self.tokens.append((elem, id_file))
-
-
-    ###Sort tokens by alphabetical order
-    def sort_tokens(self):
-        self.tokens = sorted(self.tokens, key= lambda x : x[0])
-
+        return {(token, id_file) for token in _text.lower().split() if len(token)>3}
+        
 
 class ImprovedTokenizer():
     def __init__(self):
         self.stem = Stemmer.Stemmer('english')
-        self._stop_words_file = open('snowball_stopwords_EN.txt')
-        self._stop_words = self._stop_words_file.read().split()
-    
-    def process(self,document_data):
+        self._stop_words = open('snowball_stopwords_EN.txt').read().split()
+
+    def process(self,document_data, id_file):
         ### Replace all non alpha numeric characters by spaces
         _text = re.sub( '[^a-zA-Z0-9]+', ' ', document_data)
+
         ##Filter tokens with stop words
         token_init = [ tk for tk in _text.lower().split() if tk not in self._stop_words]
         
         ##Use stemm processing
-        return self.stem.stemWords(token_init)
-        ### Convert all text to lower case and split
-        #return frozenset({token for token in _text.lower().split() if len(token)>3})
-    
+        return {(token, id_file) for token in set(self.stem.stemWords(token_init))}
+       
 
 ### Class that given a token and a file id stores that info in a dictionary
 class Indexer:
     def process(file_tokens):
-        index = defaultdict(list)
-        for token_tuple in file_tokens:
-            for token in token_tuple[0]:
-                index[token].append(token_tuple[1])
+        index = {}
+        last= ''
+        list_tokens=[]
+        for tokens in file_tokens:
+            if tokens[0] != last:
+                index[last] = (len(list_tokens),list_tokens)
+                list_tokens = []
+                last = tokens[0]
+
+            list_tokens.append(tokens[1])
+        
 
 
-        inverted_index = {token : (len(index[token]), index[token]) for token in index.keys()}
+        #print(index)
 
-        #print(inverted_index)
-
-        return inverted_index
-        ### If token already in dictionary of inverted indexes and the file id not in the file list of the token
-        # if token in self.dict_inverted_index.keys():
-        #     if id_file not in self.dict_inverted_index[token][1]:
-        #         self.dict_inverted_index[token][1].append(id_file)
-        #         self.dict_inverted_index[token][0] += 1
-
-        # ### If token not in dictionary of inverted indexes add token to dict and init structure with file id
-        # else:
-        #     self.dict_inverted_index[token] = [1,[id_file]]
+        return index

@@ -9,7 +9,7 @@ def main():
     impTokenizer = ImprovedTokenizer()
     files_tokens = []
     for k in cr.memory_files.keys():
-        files_tokens.append(SimpleToken.process(cr.memory_files[k]))
+        files_tokens.append((SimpleToken.process(cr.memory_files[k]), k))
 
         #simple_token.add_data(cr.memory_files[k],k)
     #print(files_tokens)
