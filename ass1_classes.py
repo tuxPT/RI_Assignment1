@@ -14,7 +14,7 @@ class CorpusReader:
             data_reader = csv.reader(csvfile, delimiter=',')
             # Pass the header line
             next(data_reader)
-            return [line[2] + " " + line[7] for line in data_reader if line[7] != '']
+            return [(line[3],line[2] + " " + line[7]) for line in data_reader if line[7] != '']
 
 
 
@@ -65,7 +65,7 @@ class Indexer:
                 index[token].append(i)
         return index
 
-def results(tokenizer_name, time1, time2, inverted_index1):
+def results(tokenizer_name, time1, time2, inverted_index1, data_to_match):
     print('Answers'
           + '\n------- with ' + tokenizer_name + ' tokenizer -------'
           + '\na) What was the total indexing time and how much memory (roughly) is required to index this collection?'
@@ -73,7 +73,7 @@ def results(tokenizer_name, time1, time2, inverted_index1):
           + '\nb) What is your vocabulary size?'
           + '\nR: ' + str(len(inverted_index1))
           + '\nc) List the ten first terms (in alphabetic order) that appear in only one document (document frequency = 1)'
-          + '\nR: ' + str(sorted([token for token in inverted_index1 if len(inverted_index1[token]) == 1])[0:10])
+          + '\nR: ' + str(sorted([(token, data_to_match[inverted_index1[token][0]][0]) for token in inverted_index1 if len(inverted_index1[token]) == 1])[0:10])
           + '\nd) List the ten terms with highest document frequency'
           + '\nR: ' + str(sorted([token for token in inverted_index1], key=lambda token: len(inverted_index1[token]), reverse=True)[0:10]))
 
