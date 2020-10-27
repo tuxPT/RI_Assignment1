@@ -23,14 +23,14 @@ class CorpusReader:
 class SimpleTokenizer:
     def __init__(self):
         # precompiled regex
-        self.match = re.compile('[^a-zA-Z0-9]+')
+        self.match = re.compile('[^a-zA-Z]+')
 
     def process(self, document_data):
         # Replace all non alpha numeric characters by spaces
         _text = self.match.sub(' ', document_data).lower().split()
 
         # Convert all text to lower case and split
-        return frozenset({token for token in _text if len(token)>3})
+        return frozenset({token for token in _text if len(token)>2})
 
 
     # Sort tokens by alphabetical order
@@ -43,14 +43,15 @@ class ImprovedTokenizer:
         self.stem = Stemmer.Stemmer(language)
         self._stop_words = open(stop_words_file).read().split()
         # precompiled regex
-        self.match = re.compile('[^a-zA-Z0-9]+')
-        self.stem.maxCacheSize = 100000
+        self.match = re.compile('[^a-zA-Z0-9.,()-_\']+')
+
+        #self.stem.maxCacheSize = 100000
     def process(self, document_data):
         # Replace all non alpha numeric characters by spaces
-        _text = self.match.sub(' ', document_data).lower().split()
+        _text = document_data.lower().split()
 
         # Filter tokens with stop words
-        token_init = frozenset({ token for token in _text if token not in self._stop_words})
+        token_init = frozenset({ token.lstrip('0').strip('-_.,()\'?="#$[]') for token in _text if token not in self._stop_words})
 
         # Use stemm processing
         return self.stem.stemWords(token_init)
@@ -65,15 +66,15 @@ class Indexer:
                 index[token].append(i)
         return index
 
-def results(tokenizer_name, time1, time2, inverted_index1, data_to_match):
+def results(tokenizer_name, time1, memory, inverted_index1, data_to_match):
     print('Answers'
           + '\n------- with ' + tokenizer_name + ' tokenizer -------'
           + '\na) What was the total indexing time and how much memory (roughly) is required to index this collection?'
-          + '\n' + str(time2 - time1) + " segundos"
+          + '\n' + str(time1) + " segundos / " + str(memory/10**6) + " MB"
           + '\nb) What is your vocabulary size?'
           + '\nR: ' + str(len(inverted_index1))
           + '\nc) List the ten first terms (in alphabetic order) that appear in only one document (document frequency = 1)'
-          + '\nR: ' + str(sorted([(token, data_to_match[inverted_index1[token][0]][0]) for token in inverted_index1 if len(inverted_index1[token]) == 1])[0:10])
+          + '\nR: ' + str(sorted([(token, data_to_match[inverted_index1[token][0]][0]) for token in inverted_index1 if len(inverted_index1[token]) == 1], key= lambda token : token[0]  )[0:10])
           + '\nd) List the ten terms with highest document frequency'
-          + '\nR: ' + str(sorted([token for token in inverted_index1], key=lambda token: len(inverted_index1[token]), reverse=True)[0:10]))
+          + '\nR: ' + str(sorted([(token, len(inverted_index1[token])) for token in inverted_index1], key=lambda token: token[1], reverse=True)[0:10]))
 
