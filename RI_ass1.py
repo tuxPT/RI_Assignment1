@@ -4,7 +4,7 @@ import time
 import sys
 import tracemalloc
 
-#tracemalloc.start()
+tracemalloc.start()
 
 data = CorpusReader.read('all_sources_metadata_2020-03-13.csv')
 
@@ -29,11 +29,11 @@ inverted_index1 = Indexer.process(files_tokens1)
 
 #end timer
 time2 = time.time()
-#memory, max = tracemalloc.get_traced_memory()
+memory, max = tracemalloc.get_traced_memory()
+tracemalloc.stop()
 
 with open('results.txt', 'w') as fout:
     fout.write(str([inverted_index1.keys()]))
-#tracemalloc.stop()
 #show results
-results(tokenizer_type, time2- time1,  1, inverted_index1, data)
+results(tokenizer_type, time2- time1,  memory, inverted_index1, data)
 

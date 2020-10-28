@@ -5,8 +5,8 @@ from collections import defaultdict
 
 # Class used to read and store document data such as title and abstract
 # Files with no title or abstract are ignored
-# All data is stored in a dictionary with a format like
-# {id_file0 : "title and abstract", id_file1 : "title and abstract", id_file2 : "title and abstract"}
+# All data is stored in a list with a format like
+# [(doi , "title and abstract"), (doi , "title and abstract"), (doi , "title and abstract")]
 class CorpusReader:
     def read(filename):
         # Open csv file
@@ -23,14 +23,16 @@ class CorpusReader:
 class SimpleTokenizer:
     def __init__(self):
         # precompiled regex
-        self.match = re.compile('[^a-zA-Z]+')
+        # deletes all characters not presented in A-Za-z0-9-_
+        self.match = re.compile('[^a-zA-Z-_]+')
 
     def process(self, document_data):
         # Replace all non alpha numeric characters by spaces
+        # Convert all text to lower case and split by spaces
         _text = self.match.sub(' ', document_data).lower().split()
 
-        # Convert all text to lower case and split
-        return frozenset({token for token in _text if len(token)>2})
+        # removes trailing and leading characters like - and _ from tokens
+        return frozenset({token.strip('-_ ') for token in _text if len(token)>2})
 
 
     # Sort tokens by alphabetical order
@@ -42,16 +44,22 @@ class ImprovedTokenizer:
     def __init__(self, language, stop_words_file):
         self.stem = Stemmer.Stemmer(language)
         self._stop_words = open(stop_words_file).read().split()
-        # precompiled regex
-        self.match = re.compile('[^a-zA-Z0-9.,()-_\']+')
-
-        #self.stem.maxCacheSize = 100000
+        self._stop_words += ['-','_','.',',','/']
+        
+        
+        # precompiled regex that
+        # deletes all characters not presented in A-Za-z0-9-_.,
+        # that allows words with _ - . , / and \ in the middle not to be splitted, just like links and number intervals
+        self.match = re.compile('[^A-Za-z0-9-_.,/]+')
+        self.stem.maxCacheSize = 100000
     def process(self, document_data):
         # Replace all non alpha numeric characters by spaces
-        _text = document_data.lower().split()
+        # turns all text into lower case and splits by spaces
+        _text = _text = self.match.sub(' ', document_data).lower().split()
 
-        # Filter tokens with stop words
-        token_init = frozenset({ token.lstrip('0').strip('-_.,()\'?="#$[]') for token in _text if token not in self._stop_words})
+        # Filter tokens with stop words 
+        # removes left side zeros and removes trailing and leading characters like \-_.,/ from tokens
+        token_init = frozenset({ token.strip('-_.,/') for token in _text if token not in self._stop_words})
 
         # Use stemm processing
         return self.stem.stemWords(token_init)
