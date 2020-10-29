@@ -3,8 +3,10 @@ from ass1_classes import CorpusReader, SimpleTokenizer, ImprovedTokenizer, Index
 import time
 import sys
 import tracemalloc
+import json
 
-tracemalloc.start()
+#Start time
+time1 = time.time()
 
 data = CorpusReader.read('all_sources_metadata_2020-03-13.csv')
 
@@ -22,18 +24,17 @@ else:
 files_tokens1 = [tokenizer.process(data_from_doc[1]) for data_from_doc in data]
 #Indexing Step
 
-#start timer
-time1 = time.time()
-
 inverted_index1 = Indexer.process(files_tokens1)
 
 #end timer
 time2 = time.time()
-memory, max = tracemalloc.get_traced_memory()
-tracemalloc.stop()
+#memory, peak = tracemalloc.get_traced_memory()
+#tracemalloc.stop()
 
-with open('results.txt', 'w') as fout:
-    fout.write(str([inverted_index1.keys()]))
+fout = open(tokenizer_type + "_results.json", "w")
+fout.write(json.dumps(inverted_index1))
+time3 = time.time()
+
 #show results
-results(tokenizer_type, time2- time1,  memory, inverted_index1, data)
+results(tokenizer_type, time2 - time1, time3 - time2, inverted_index1, data)
 

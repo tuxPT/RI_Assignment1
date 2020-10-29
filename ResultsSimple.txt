@@ -1,0 +1,10 @@
+Answers
+------- with Simple tokenizer -------
+a) What was the total indexing, writing time and memory space is required to index this collection?
+R) Indexing time: 8.795711994171143 segundos / writing index to file: 0.9396195411682129 segundos / memory: 230 MB
+b) What is your vocabulary size?
+R: 61050
+c) List the ten first terms (in alphabetic order) that appear in only one document (document frequency = 1)
+R: [('aaaaaag', ''), ('aaaauga', ''), ('aaac', 'http://dx.doi.org/10.1128/JVI.75.16.7362-7374.2001'), ('aaag', 'http://dx.doi.org/10.1186/1471-2350-11-161'), ('aaap', 'http://dx.doi.org/10.1128/JVI.02130-09'), ('aaars', 'http://dx.doi.org/10.1128/JVI.00613-09'), ('aabb', 'http://dx.doi.org/10.1111/voxs.12070'), ('aacaaaaaaggg', ''), ('aacetaminophen', 'http://dx.doi.org/10.1186/s40413-016-0096-1'), ('aacgaa', 'http://dx.doi.org/10.1073/pnas.1311542110')]
+d) List the ten terms with highest document frequency
+R: [('the', 26665), ('and', 26576), ('for', 21538), ('with', 21447), ('that', 20276), ('this', 16600), ('from', 15442), ('was', 14470), ('are', 14090), ('were', 13807)]

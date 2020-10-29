@@ -19,47 +19,39 @@ class CorpusReader:
 
 
 # Class used to create tokens
-# Deletes non alpha numeric characters, ignores tokens with less than 3 chars, transforms all text to lower case and split
+# Deletes non alpha characters, ignores tokens with less than 3 chars, transforms all text to lower case and split
 class SimpleTokenizer:
     def __init__(self):
         # precompiled regex
-        # deletes all characters not presented in A-Za-z0-9-_
-        self.match = re.compile('[^a-zA-Z-_]+')
+        # deletes all characters not presented in A-Za-z
+        self.match = re.compile('[^a-zA-Z]+')
 
     def process(self, document_data):
-        # Replace all non alpha numeric characters by spaces
+        # Replace all non alphabetic characters by spaces
         # Convert all text to lower case and split by spaces
         _text = self.match.sub(' ', document_data).lower().split()
 
         # removes trailing and leading characters like - and _ from tokens
-        return frozenset({token.strip('-_ ') for token in _text if len(token)>2})
-
-
-    # Sort tokens by alphabetical order
-    def sort_tokens(self):
-        self.tokens = sorted(self.tokens, key= lambda x : x[0])
-
+        return {token for token in _text if len(token)>2}
 
 class ImprovedTokenizer:
     def __init__(self, language, stop_words_file):
         self.stem = Stemmer.Stemmer(language)
-        self._stop_words = open(stop_words_file).read().split()
-        self._stop_words += ['-','_','.',',','/']
-        
-        
+        self._stop_words = open(stop_words_file).read().split() + ['-','_','.',',','/','']
+
+
         # precompiled regex that
         # deletes all characters not presented in A-Za-z0-9-_.,
         # that allows words with _ - . , / and \ in the middle not to be splitted, just like links and number intervals
         self.match = re.compile('[^A-Za-z0-9-_.,/]+')
         self.stem.maxCacheSize = 100000
     def process(self, document_data):
-        # Replace all non alpha numeric characters by spaces
         # turns all text into lower case and splits by spaces
-        _text = _text = self.match.sub(' ', document_data).lower().split()
+        _text = self.match.sub(' ', document_data).lower().split()
 
-        # Filter tokens with stop words 
-        # removes left side zeros and removes trailing and leading characters like \-_.,/ from tokens
-        token_init = frozenset({ token.strip('-_.,/') for token in _text if token not in self._stop_words})
+        # Filter tokens with stop words
+        # removes leading and trailing characters like \-_.,/ from tokens
+        token_init = {token.strip('-_.,/') for token in _text if token.strip('-_.,/') not in self._stop_words}
 
         # Use stemm processing
         return self.stem.stemWords(token_init)
@@ -69,16 +61,17 @@ class ImprovedTokenizer:
 class Indexer:
     def process(file_tokens):
         index = defaultdict(list)
+        # Beware only stores the id and not the length of the list of ids because python internaly has a variable where the size of lists, sets and other objects is stored, so len(list) is a O(1) operation
         for i, tokens in enumerate(file_tokens):
             for token in tokens:
                 index[token].append(i)
         return index
 
-def results(tokenizer_name, time1, memory, inverted_index1, data_to_match):
+def results(tokenizer_name, time1, time2, inverted_index1, data_to_match):
     print('Answers'
           + '\n------- with ' + tokenizer_name + ' tokenizer -------'
-          + '\na) What was the total indexing time and how much memory (roughly) is required to index this collection?'
-          + '\n' + str(time1) + " segundos / " + str(memory/10**6) + " MB"
+          + '\na) What was the total indexing and writing time is required to index this collection?'
+          + '\nR) Indexing time: ' + str(time1) + " segundos / writing index to file: " + str(time2) + " segundos"
           + '\nb) What is your vocabulary size?'
           + '\nR: ' + str(len(inverted_index1))
           + '\nc) List the ten first terms (in alphabetic order) that appear in only one document (document frequency = 1)'
