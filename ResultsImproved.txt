@@ -1,7 +1,7 @@
 Answers
 ------- with Improved tokenizer -------
 a) What was the total indexing, writing time and memory is required to index this collection?
-R) Indexing time: 32.008768796920776 segundos / writing index to file: 1.1868488788604736 segundos / memory: 208 MB
+R) Indexing time: 12.3 segundos / writing index to file: 0.5 segundos / memory: 208 MB
 b) What is your vocabulary size?
 R: 101432
 c) List the ten first terms (in alphabetic order) that appear in only one document (document frequency = 1)

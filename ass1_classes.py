@@ -1,3 +1,7 @@
+# Authors:
+## Alexandre Santos 80106
+## Leonardo Costa   80162
+
 import csv
 import re
 import Stemmer

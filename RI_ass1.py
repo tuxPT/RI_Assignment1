@@ -1,4 +1,9 @@
 #!/bin/env python3
+
+# Authors:
+## Alexandre Santos 80106
+## Leonardo Costa   80162
+
 from ass1_classes import CorpusReader, SimpleTokenizer, ImprovedTokenizer, Indexer, results
 import time
 import sys
